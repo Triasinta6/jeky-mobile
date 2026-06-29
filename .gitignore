@@ -1,0 +1,22 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.DS_Store
+
+
+# Android generated files
+.gradle/
+.idea/
+build/
+app/build/
+local.properties
+*.iml
+.DS_Store
+
+# Ignore backend and admin frontend for mobile repo
+jeky-backend/
+jeky-admin-frontend/
+run-backend.bat
+run-frontend.bat
