@@ -1,9 +1,12 @@
 package id.aejeky.presentation.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,9 +19,15 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,26 +73,58 @@ fun HomeScreen(
             .padding(20.dp)
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo_jeky),
-                contentDescription = "Jeky Logo",
-                modifier = Modifier.size(48.dp)
+                contentDescription = "Profile User",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(52.dp).clip(CircleShape).background(Color(0xFF12B76A))
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Column {
+            Column (
+                modifier = Modifier.weight(1f)
+            ){
                 Text(
-                    text = "Hello, Jeky User!",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Mau ke mana hari ini?",
+                    text = "Hello,",
                     fontSize = 14.sp,
                     color = Color.Gray
+                )
+                Text(
+                    text = "Nama User",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF101828)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .clickable {
+                        // nanti bisa diarahkan ke halaman notifikasi
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifikasi",
+                    tint = Color(0xFF101828),
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .align(Alignment.TopEnd)
+                        .offset(x = (-9).dp, y = 9.dp)
+                        .clip(CircleShape)
+                        .background(Color.Red)
                 )
             }
         }
