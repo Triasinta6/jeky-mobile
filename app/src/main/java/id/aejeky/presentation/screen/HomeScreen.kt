@@ -53,7 +53,8 @@ import androidx.compose.ui.unit.sp
 import id.aejeky.R
 import id.aejeky.data.api.ApiClient
 import id.aejeky.data.model.Layanan
-import id.aejeky.presentation.component.ServiceCard
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material.icons.filled.Search
 
 @Composable
 fun HomeScreen(
@@ -84,6 +85,22 @@ fun HomeScreen(
             .fillMaxSize()
             .background(Color(0xFFF7F7F7))
     ) {
+        //box header
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(270.dp)
+                .clip(RoundedCornerShape(bottomStart = 5.dp, bottomEnd = 5.dp))
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF0B63F6),
+                            Color(0xFF2563EB),
+                            Color(0xFF60A5FA)
+                        )
+                    )
+                )
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -104,6 +121,7 @@ fun HomeScreen(
                         .background(primaryBlue)
                 )
 
+                //notifikasi
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Column(
@@ -112,14 +130,14 @@ fun HomeScreen(
                     Text(
                         text = "Halo,",
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = Color.White.copy(alpha = 0.85f)
                     )
 
                     Text(
                         text = "Nama User",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = darkText
+                        color = Color.White
                     )
                 }
 
@@ -156,6 +174,7 @@ fun HomeScreen(
                 }
             }
 
+            //saldo card
             Spacer(modifier = Modifier.height(24.dp))
 
             Box(
@@ -168,15 +187,7 @@ fun HomeScreen(
                         clip = false
                     )
                     .clip(RoundedCornerShape(22.dp))
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color(0xFF3B82F6),
-                                Color(0xFF2563EB),
-                                Color(0xFF1D4ED8)
-                            )
-                        )
-                    )
+                    .background(Color.White)
                     .padding(horizontal = 20.dp, vertical = 22.dp)
             ) {
                 Row(
@@ -187,25 +198,15 @@ fun HomeScreen(
                         modifier = Modifier
                             .size(70.dp)
                             .clip(RoundedCornerShape(20.dp))
-                            .background(Color.White.copy(alpha = 0.16f)),
+                            .background(primaryBlue.copy(alpha = 0.10f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(42.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color.White),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .align(Alignment.CenterEnd)
-                                    .offset(x = (-5).dp)
-                                    .clip(CircleShape)
-                                    .background(primaryBlue)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.AccountBalanceWallet,
+                            contentDescription ="Saldo Jeky",
+                            tint = primaryBlue,
+                            modifier = Modifier.size(34.dp)
+                        )
                     }
 
                     Spacer(modifier = Modifier.width(18.dp))
@@ -216,8 +217,8 @@ fun HomeScreen(
                     ) {
                         Text(
                             text = "Saldo Jeky",
-                            color = Color.White,
-                            fontSize = 18.sp
+                            color = Color(0xFF667085),
+                            fontSize = 16.sp
                         )
 
                         Spacer(modifier = Modifier.height(6.dp))
@@ -227,7 +228,7 @@ fun HomeScreen(
                         ) {
                             Text(
                                 text = "Rp 50.000",
-                                color = Color.White,
+                                color = Color(0xFF101828),
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -237,8 +238,8 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowRight,
                                 contentDescription = "Detail saldo",
-                                tint = Color.White,
-                                modifier = Modifier.size(28.dp)
+                                tint = primaryBlue,
+                                modifier = Modifier.size(26.dp)
                             )
                         }
                     }
@@ -246,7 +247,7 @@ fun HomeScreen(
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(50.dp))
-                            .background(Color.White)
+                            .background(primaryBlue.copy(alpha = 0.10f))
                             .clickable {
                                 // nanti diarahkan ke halaman top up
                             }
@@ -280,16 +281,24 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            //search bar
+            Spacer(modifier = Modifier.height(16.dp))
+
+            JekySearchBar(
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Layanan jeky
+            Spacer(modifier = Modifier.height(28.dp))
 
             Text(
-                text = "Layanan",
-                fontSize = 20.sp,
+                text = "Layanan Jeky",
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = darkText
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Box(
                 modifier = Modifier
@@ -323,11 +332,11 @@ fun HomeScreen(
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             modifier = Modifier.fillMaxSize(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
                             items(services) { service ->
-                                ServiceCard(
+                                JekyServiceCard(
                                     service = service,
                                     onClick = {
                                         onServiceClick(service)
@@ -353,11 +362,142 @@ fun HomeScreen(
     }
 }
 
+@Composable
+private fun JekyServiceCard(
+    service: Layanan,
+    onClick: () -> Unit
+) {
+    val serviceName = service.nama
+    val serviceDescription = service.deskripsi.orEmpty().trim()
+
+    val titleColor = getServiceColor(serviceName)
+    val serviceIcon = getServiceIcon(serviceName)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(118.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(22.dp),
+                clip = false
+            )
+            .clip(RoundedCornerShape(22.dp))
+            .background(Color.White)
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(58.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(titleColor.copy(alpha = 0.10f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = serviceIcon,
+                fontSize = 34.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = serviceName,
+                color = titleColor,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = serviceDescription.ifBlank { "Layanan Jeky" },
+                color = Color(0xFF667085),
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+private fun getServiceColor(serviceName: String): Color {
+    val name = serviceName.lowercase()
+
+    return when {
+        name.contains("ride") -> Color(0xFF2563EB)
+        name.contains("food") -> Color(0xFFF97316)
+        name.contains("send") || name.contains("delivery") -> Color(0xFF039855)
+        name.contains("mart") -> Color(0xFF7C3AED)
+        else -> Color(0xFF2563EB)
+    }
+}
+
+private fun getServiceIcon(serviceName: String): String {
+    val name = serviceName.lowercase()
+
+    return when {
+        name.contains("ride") -> "🛵"
+        name.contains("food") -> "🍔"
+        name.contains("send") || name.contains("delivery") -> "📦"
+        name.contains("mart") -> "🛒"
+        else -> "✨"
+    }
+}
+
 data class BottomMenuItem(
     val key: String,
     val title: String,
     val icon: ImageVector
 )
+
+@Composable
+private fun JekySearchBar(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .height(58.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp),
+                clip = false
+            )
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .clickable {
+                // nanti bisa diarahkan ke halaman search / pilih layanan
+            }
+            .padding(horizontal = 18.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = "Cari layanan",
+            tint = Color(0xFF344054),
+            modifier = Modifier.size(26.dp)
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Text(
+            text = "Mau pergi atau butuh layanan apa?",
+            color = Color(0xFF98A2B3),
+            fontSize = 15.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
 
 @Composable
 private fun JekyBottomNavigationBar(
