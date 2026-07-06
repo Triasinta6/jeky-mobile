@@ -59,6 +59,8 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
+    implementation("androidx.compose.material:material-icons-extended")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
