@@ -25,3 +25,5 @@ val SearchIconGray = Color(0xFF344054)
 val ServiceFoodOrange = Color(0xFFF97316)
 val ServiceSendGreen = Color(0xFF039855)
 val ServiceMartPurple = Color(0xFF7C3AED)
+
+val GoogleRed = Color(0xFFEA4335)

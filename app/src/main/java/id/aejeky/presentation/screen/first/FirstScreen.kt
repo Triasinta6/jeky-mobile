@@ -1,10 +1,10 @@
-package id.aejeky.presentation.screen
+package id.aejeky.presentation.screen.first
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,28 +24,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import id.aejeky.presentation.theme.DarkBlue
+import id.aejeky.presentation.theme.LightBlue
+import id.aejeky.presentation.theme.PrimaryBlue
+import id.aejeky.presentation.theme.White
 
 @Composable
 fun FirstScreen(
     onStartClick: () -> Unit
 ) {
-    val primaryBlue = Color(0xFF2563EB)
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF0B63F6),
-                        Color(0xFF2563EB),
-                        Color(0xFF60A5FA)
+                        DarkBlue, PrimaryBlue, LightBlue
                     )
                 )
             )
@@ -60,7 +59,7 @@ fun FirstScreen(
         ) {
             Text(
                 text = "Jeky",
-                color = Color.White,
+                color = White,
                 fontSize = 78.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontStyle = FontStyle.Italic
@@ -70,7 +69,7 @@ fun FirstScreen(
 
             Text(
                 text = "Layanan on-demand\nyang selalu ada untukmu.",
-                color = Color.White.copy(alpha = 0.92f),
+                color = White.copy(alpha = 0.92f),
                 fontSize = 22.sp,
                 lineHeight = 30.sp,
                 textAlign = TextAlign.Center,
@@ -83,13 +82,13 @@ fun FirstScreen(
                 modifier = Modifier
                     .size(210.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.16f)),
+                    .background(White.copy(alpha = 0.16f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.DeliveryDining,
                     contentDescription = "Jeky Driver",
-                    tint = Color.White,
+                    tint = White,
                     modifier = Modifier.size(120.dp)
                 )
             }
@@ -112,12 +111,12 @@ fun FirstScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White
+                    containerColor = White
                 )
             ) {
                 Text(
                     text = "Mulai Sekarang",
-                    color = primaryBlue,
+                    color = PrimaryBlue,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -128,7 +127,7 @@ fun FirstScreen(
 
 @Composable
 private fun RowIndicator() {
-    androidx.compose.foundation.layout.Row(
+    Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -136,21 +135,21 @@ private fun RowIndicator() {
             modifier = Modifier
                 .size(width = 36.dp, height = 5.dp)
                 .clip(RoundedCornerShape(50.dp))
-                .background(Color.White)
+                .background(White)
         )
 
         Box(
             modifier = Modifier
                 .size(width = 28.dp, height = 5.dp)
                 .clip(RoundedCornerShape(50.dp))
-                .background(Color.White.copy(alpha = 0.35f))
+                .background(White.copy(alpha = 0.35f))
         )
 
         Box(
             modifier = Modifier
                 .size(width = 28.dp, height = 5.dp)
                 .clip(RoundedCornerShape(50.dp))
-                .background(Color.White.copy(alpha = 0.35f))
+                .background(White.copy(alpha = 0.35f))
         )
     }
 }
