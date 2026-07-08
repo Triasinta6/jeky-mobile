@@ -1,9 +1,8 @@
-package id.aejeky.presentation.screen
+package id.aejeky.presentation.screen.order
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +37,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.aejeky.data.model.Layanan
+import id.aejeky.presentation.theme.BorderGray
+import id.aejeky.presentation.theme.ErrorRed
+import id.aejeky.presentation.theme.PrimaryBlue
+import id.aejeky.presentation.theme.ScreenBackground
+import id.aejeky.presentation.theme.SoftBlueBackground
+import id.aejeky.presentation.theme.SuccessGreen
+import id.aejeky.presentation.theme.TextPlaceholder
+import id.aejeky.presentation.theme.TextPrimary
+import id.aejeky.presentation.theme.TextSecondary
+import id.aejeky.presentation.theme.White
 import id.aejeky.util.formatRupiah
 
 @Composable
@@ -45,15 +54,10 @@ fun OrderScreen(
     service: Layanan,
     onBackClick: () -> Unit
 ) {
-    val primaryBlue = Color(0xFF2563EB)
-    val darkText = Color(0xFF101828)
-    val softText = Color(0xFF667085)
-    val background = Color(0xFFF7F7F7)
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(background)
+            .background(ScreenBackground)
             .imePadding()
     ) {
         Column(
@@ -73,7 +77,7 @@ fun OrderScreen(
                         .align(Alignment.CenterStart)
                         .size(42.dp)
                         .clip(CircleShape)
-                        .background(Color.White)
+                        .background(White)
                         .clickable {
                             onBackClick()
                         },
@@ -82,7 +86,7 @@ fun OrderScreen(
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Kembali",
-                        tint = darkText,
+                        tint = TextPrimary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -91,7 +95,7 @@ fun OrderScreen(
                     text = service.nama,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = darkText
+                    color = TextPrimary
                 )
             }
 
@@ -109,14 +113,13 @@ fun OrderScreen(
                 text = "Pilih Layanan",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = darkText
+                color = TextPrimary
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             SelectedServiceCard(
-                service = service,
-                primaryBlue = primaryBlue
+                service = service
             )
 
             Spacer(modifier = Modifier.height(22.dp))
@@ -125,22 +128,19 @@ fun OrderScreen(
                 text = "Metode Pembayaran",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = darkText
+                color = TextPrimary
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             PaymentRow(
                 title = "JekyPay",
-                subtitle = "Pilih metode pembayaran",
-                primaryBlue = primaryBlue
+                subtitle = "Pilih metode pembayaran"
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            PromoRow(
-                primaryBlue = primaryBlue
-            )
+            PromoRow()
 
             Spacer(modifier = Modifier.height(26.dp))
 
@@ -154,12 +154,12 @@ fun OrderScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = primaryBlue
+                    containerColor = PrimaryBlue
                 )
             ) {
                 Text(
                     text = "Pesan ${service.nama}",
-                    color = Color.White,
+                    color = White,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -182,12 +182,12 @@ private fun MapPreviewCard() {
                 clip = false
             )
             .clip(RoundedCornerShape(24.dp))
-            .background(Color(0xFFEFF6FF)),
+            .background(SoftBlueBackground),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "Peta rute perjalanan",
-            color = Color(0xFF667085),
+            color = TextSecondary,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium
         )
@@ -195,7 +195,7 @@ private fun MapPreviewCard() {
         Icon(
             imageVector = Icons.Default.LocationOn,
             contentDescription = "Lokasi jemput",
-            tint = Color(0xFF12B76A),
+            tint = SuccessGreen,
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 42.dp, top = 34.dp)
@@ -205,7 +205,7 @@ private fun MapPreviewCard() {
         Icon(
             imageVector = Icons.Default.LocationOn,
             contentDescription = "Tujuan",
-            tint = Color(0xFFF04438),
+            tint = ErrorRed,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 42.dp, bottom = 34.dp)
@@ -225,13 +225,13 @@ private fun LocationSummaryCard() {
                 clip = false
             )
             .clip(RoundedCornerShape(24.dp))
-            .background(Color.White)
+            .background(White)
             .padding(18.dp)
     ) {
         LocationRow(
             title = "Lokasi Jemput",
             value = "Pilih lokasi jemput",
-            color = Color(0xFF12B76A)
+            color = SuccessGreen
         )
 
         Spacer(modifier = Modifier.height(14.dp))
@@ -240,7 +240,7 @@ private fun LocationSummaryCard() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(Color(0xFFE4E7EC))
+                .background(BorderGray)
         )
 
         Spacer(modifier = Modifier.height(14.dp))
@@ -248,7 +248,7 @@ private fun LocationSummaryCard() {
         LocationRow(
             title = "Tujuan",
             value = "Pilih lokasi tujuan",
-            color = Color(0xFFF04438)
+            color = ErrorRed
         )
     }
 }
@@ -286,7 +286,7 @@ private fun LocationRow(
             Text(
                 text = title,
                 fontSize = 14.sp,
-                color = Color(0xFF667085)
+                color = TextSecondary
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -295,14 +295,14 @@ private fun LocationRow(
                 text = value,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF101828)
+                color = TextPrimary
             )
         }
 
         Icon(
             imageVector = Icons.Default.KeyboardArrowRight,
             contentDescription = "Pilih $title",
-            tint = Color(0xFF98A2B3),
+            tint = TextPlaceholder,
             modifier = Modifier.size(24.dp)
         )
     }
@@ -310,8 +310,7 @@ private fun LocationRow(
 
 @Composable
 private fun SelectedServiceCard(
-    service: Layanan,
-    primaryBlue: Color
+    service: Layanan
 ) {
     Row(
         modifier = Modifier
@@ -323,10 +322,10 @@ private fun SelectedServiceCard(
                 clip = false
             )
             .clip(RoundedCornerShape(22.dp))
-            .background(Color.White)
+            .background(White)
             .border(
                 width = 1.5.dp,
-                color = primaryBlue,
+                color = PrimaryBlue,
                 shape = RoundedCornerShape(22.dp)
             )
             .padding(horizontal = 16.dp),
@@ -336,7 +335,7 @@ private fun SelectedServiceCard(
             modifier = Modifier
                 .size(58.dp)
                 .clip(RoundedCornerShape(18.dp))
-                .background(primaryBlue.copy(alpha = 0.10f)),
+                .background(PrimaryBlue.copy(alpha = 0.10f)),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -354,7 +353,7 @@ private fun SelectedServiceCard(
                 text = service.nama,
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF101828)
+                color = TextPrimary
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -362,7 +361,7 @@ private fun SelectedServiceCard(
             Text(
                 text = "Estimasi otomatis",
                 fontSize = 13.sp,
-                color = Color(0xFF667085)
+                color = TextSecondary
             )
         }
 
@@ -370,7 +369,7 @@ private fun SelectedServiceCard(
             text = formatRupiah(service.hargaDasar ?: 0),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = primaryBlue,
+            color = PrimaryBlue,
             textAlign = TextAlign.End
         )
     }
@@ -379,8 +378,7 @@ private fun SelectedServiceCard(
 @Composable
 private fun PaymentRow(
     title: String,
-    subtitle: String,
-    primaryBlue: Color
+    subtitle: String
 ) {
     Row(
         modifier = Modifier
@@ -392,7 +390,7 @@ private fun PaymentRow(
                 clip = false
             )
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
+            .background(White)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -400,13 +398,13 @@ private fun PaymentRow(
             modifier = Modifier
                 .size(44.dp)
                 .clip(RoundedCornerShape(15.dp))
-                .background(primaryBlue.copy(alpha = 0.10f)),
+                .background(PrimaryBlue.copy(alpha = 0.10f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.AccountBalanceWallet,
                 contentDescription = title,
-                tint = primaryBlue,
+                tint = PrimaryBlue,
                 modifier = Modifier.size(25.dp)
             )
         }
@@ -420,7 +418,7 @@ private fun PaymentRow(
                 text = title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF101828)
+                color = TextPrimary
             )
 
             Spacer(modifier = Modifier.height(3.dp))
@@ -428,23 +426,21 @@ private fun PaymentRow(
             Text(
                 text = subtitle,
                 fontSize = 13.sp,
-                color = Color(0xFF667085)
+                color = TextSecondary
             )
         }
 
         Icon(
             imageVector = Icons.Default.KeyboardArrowRight,
             contentDescription = "Pilih pembayaran",
-            tint = Color(0xFF98A2B3),
+            tint = TextPlaceholder,
             modifier = Modifier.size(24.dp)
         )
     }
 }
 
 @Composable
-private fun PromoRow(
-    primaryBlue: Color
-) {
+private fun PromoRow() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -455,7 +451,7 @@ private fun PromoRow(
                 clip = false
             )
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
+            .background(White)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -463,14 +459,14 @@ private fun PromoRow(
             modifier = Modifier
                 .size(44.dp)
                 .clip(RoundedCornerShape(15.dp))
-                .background(primaryBlue.copy(alpha = 0.10f)),
+                .background(PrimaryBlue.copy(alpha = 0.10f)),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "%",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = primaryBlue
+                color = PrimaryBlue
             )
         }
 
@@ -481,13 +477,13 @@ private fun PromoRow(
             modifier = Modifier.weight(1f),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF101828)
+            color = TextPrimary
         )
 
         Icon(
             imageVector = Icons.Default.KeyboardArrowRight,
             contentDescription = "Gunakan promo",
-            tint = Color(0xFF98A2B3),
+            tint = TextPlaceholder,
             modifier = Modifier.size(24.dp)
         )
     }

@@ -6,10 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import id.aejeky.data.model.Layanan
-import id.aejeky.presentation.screen.FirstScreen
-import id.aejeky.presentation.screen.HomeScreen
-import id.aejeky.presentation.screen.LoginScreen
-import id.aejeky.presentation.screen.OrderScreen
+import id.aejeky.presentation.screen.first.FirstScreen
+import id.aejeky.presentation.screen.home.HomeScreen
+import id.aejeky.presentation.screen.login.LoginScreen
+import id.aejeky.presentation.screen.order.OrderScreen
 
 @Composable
 fun JekyApp() {
@@ -54,6 +54,8 @@ fun JekyApp() {
                         currentScreen = "home"
                     }
                 )
+            } ?: run {
+                currentScreen = "home"
             }
         }
     }
