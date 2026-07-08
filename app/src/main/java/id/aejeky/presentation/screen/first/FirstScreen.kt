@@ -1,5 +1,6 @@
 package id.aejeky.presentation.screen.first
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,26 +14,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeliveryDining
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import id.aejeky.presentation.theme.DarkBlue
-import id.aejeky.presentation.theme.LightBlue
-import id.aejeky.presentation.theme.PrimaryBlue
-import id.aejeky.presentation.theme.White
+import id.aejeky.R
 
 @Composable
 fun FirstScreen(
@@ -42,82 +39,79 @@ fun FirstScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                brush = Brush.verticalGradient(
+                Brush.verticalGradient(
                     colors = listOf(
-                        DarkBlue, PrimaryBlue, LightBlue
+                        Color(0xFF0057F8),
+                        Color(0xFF007BFF),
+                        Color(0xFF22B8FF)
                     )
                 )
             )
-            .padding(28.dp)
+            .padding(horizontal = 32.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 38.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(top = 120.dp, bottom = 56.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Jeky",
-                color = White,
-                fontSize = 78.sp,
-                fontWeight = FontWeight.ExtraBold,
-                fontStyle = FontStyle.Italic
+                color = Color.White,
+                fontSize = 64.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Layanan on-demand\nyang selalu ada untukmu.",
-                color = White.copy(alpha = 0.92f),
-                fontSize = 22.sp,
-                lineHeight = 30.sp,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Medium
+                text = "Satu aplikasi untuk\nsemua perjalananmu.",
+                color = Color.White,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Medium,
+                lineHeight = 36.sp,
+                textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(54.dp))
+            Spacer(modifier = Modifier.height(56.dp))
 
-            Box(
+            Image(
+                painter = painterResource(id = R.drawable.onboarding_driver),
+                contentDescription = "Jeky Onboarding Driver",
                 modifier = Modifier
-                    .size(210.dp)
-                    .clip(CircleShape)
-                    .background(White.copy(alpha = 0.16f)),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .height(360.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.DeliveryDining,
-                    contentDescription = "Jeky Driver",
-                    tint = White,
-                    modifier = Modifier.size(120.dp)
-                )
+                Dot(isActive = true)
+                Dot(isActive = false)
+                Dot(isActive = false)
             }
-        }
 
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            RowIndicator()
-
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(44.dp))
 
             Button(
                 onClick = onStartClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(20.dp),
+                    .height(72.dp),
+                shape = RoundedCornerShape(40.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = White
+                    containerColor = Color.White,
+                    contentColor = Color(0xFF0066F5)
                 )
             ) {
                 Text(
                     text = "Mulai Sekarang",
-                    color = PrimaryBlue,
-                    fontSize = 16.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -126,30 +120,13 @@ fun FirstScreen(
 }
 
 @Composable
-private fun RowIndicator() {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(width = 36.dp, height = 5.dp)
-                .clip(RoundedCornerShape(50.dp))
-                .background(White)
-        )
-
-        Box(
-            modifier = Modifier
-                .size(width = 28.dp, height = 5.dp)
-                .clip(RoundedCornerShape(50.dp))
-                .background(White.copy(alpha = 0.35f))
-        )
-
-        Box(
-            modifier = Modifier
-                .size(width = 28.dp, height = 5.dp)
-                .clip(RoundedCornerShape(50.dp))
-                .background(White.copy(alpha = 0.35f))
-        )
-    }
+private fun Dot(isActive: Boolean) {
+    Box(
+        modifier = Modifier
+            .size(18.dp)
+            .clip(CircleShape)
+            .background(
+                if (isActive) Color.White else Color.White.copy(alpha = 0.35f)
+            )
+    )
 }
