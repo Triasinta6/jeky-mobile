@@ -10,6 +10,7 @@ import id.aejeky.presentation.screen.first.FirstScreen
 import id.aejeky.presentation.screen.home.HomeScreen
 import id.aejeky.presentation.screen.login.LoginScreen
 import id.aejeky.presentation.screen.order.OrderScreen
+import id.aejeky.presentation.screen.register.RegisterScreen
 
 @Composable
 fun JekyApp() {
@@ -31,6 +32,20 @@ fun JekyApp() {
                     currentScreen = "first"
                 },
                 onLoginClick = {
+                    currentScreen = "home"
+                },
+                onRegisterClick = {
+                    currentScreen = "register"
+                }
+            )
+        }
+
+        "register" -> {
+            RegisterScreen(
+                onBackToLoginClick = {
+                    currentScreen = "login"
+                },
+                onRegisterClick = {
                     currentScreen = "home"
                 }
             )
