@@ -60,22 +60,35 @@ import id.aejeky.presentation.theme.White
 fun LoginScreen(
     onBackClick: () -> Unit,
     onLoginClick: () -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit
 ) {
     var emailOrPhone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
+    var emailOrPhoneError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
 
     fun validateLogin() {
-        errorMessage = when {
-            emailOrPhone.isBlank() -> "Nomor HP atau Email wajib diisi"
-            password.isBlank() -> "Kata sandi wajib diisi"
-            password.length < 6 -> "Kata sandi minimal 6 karakter"
-            else -> ""
+        emailOrPhoneError = ""
+        passwordError = ""
+
+        var isValid = true
+
+        if (emailOrPhone.isBlank()) {
+            emailOrPhoneError = "Nomor HP atau Email wajib diisi"
+            isValid = false
         }
 
-        if (errorMessage.isEmpty()) {
+        if (password.isBlank()) {
+            passwordError = "Kata sandi wajib diisi"
+            isValid = false
+        } else if (password.length < 6) {
+            passwordError = "Kata sandi minimal 6 karakter"
+            isValid = false
+        }
+
+        if (isValid) {
             onLoginClick()
         }
     }
@@ -99,22 +112,24 @@ fun LoginScreen(
             emailOrPhone = emailOrPhone,
             onEmailOrPhoneChange = {
                 emailOrPhone = it
-                errorMessage = ""
+                emailOrPhoneError = ""
             },
             password = password,
             onPasswordChange = {
                 password = it
-                errorMessage = ""
+                passwordError = ""
             },
             isPasswordVisible = isPasswordVisible,
             onPasswordVisibilityClick = {
                 isPasswordVisible = !isPasswordVisible
             },
-            errorMessage = errorMessage,
+            emailOrPhoneError = emailOrPhoneError,
+            passwordError = passwordError,
             onLoginClick = {
                 validateLogin()
             },
-            onRegisterClick = onRegisterClick
+            onRegisterClick = onRegisterClick,
+            onForgotPasswordClick = onForgotPasswordClick
         )
     }
 }
@@ -189,9 +204,11 @@ private fun LoginForm(
     onPasswordChange: (String) -> Unit,
     isPasswordVisible: Boolean,
     onPasswordVisibilityClick: () -> Unit,
-    errorMessage: String,
+    emailOrPhoneError: String,
+    passwordError: String,
     onLoginClick: () -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -207,7 +224,8 @@ private fun LoginForm(
                     contentDescription = "Nomor HP atau Email",
                     tint = TextPlaceholder
                 )
-            }
+            },
+            errorMessage = emailOrPhoneError
         )
 
         Spacer(modifier = Modifier.height(14.dp))
@@ -240,7 +258,8 @@ private fun LoginForm(
                 }
             },
             isPassword = true,
-            isPasswordVisible = isPasswordVisible
+            isPasswordVisible = isPasswordVisible,
+            errorMessage = passwordError
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -250,23 +269,12 @@ private fun LoginForm(
             modifier = Modifier
                 .align(Alignment.End)
                 .clickable {
-                    // nanti bisa diarahkan ke forgot password
+                    onForgotPasswordClick()
                 },
             color = PrimaryBlue,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
-
-        if (errorMessage.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = errorMessage,
-                color = GoogleRed,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
 
         Spacer(modifier = Modifier.height(18.dp))
 
@@ -299,7 +307,8 @@ private fun LoginInputField(
     leadingIcon: @Composable () -> Unit,
     trailingIcon: @Composable (() -> Unit)? = null,
     isPassword: Boolean = false,
-    isPasswordVisible: Boolean = false
+    isPasswordVisible: Boolean = false,
+    errorMessage: String = ""
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -329,6 +338,7 @@ private fun LoginInputField(
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
             singleLine = true,
+            isError = errorMessage.isNotEmpty(),
             shape = RoundedCornerShape(14.dp),
             visualTransformation = if (isPassword && !isPasswordVisible) {
                 PasswordVisualTransformation()
@@ -336,13 +346,45 @@ private fun LoginInputField(
                 VisualTransformation.None
             },
             colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                errorTextColor = TextPrimary,
+
+                focusedPlaceholderColor =  TextPlaceholder,
+                unfocusedPlaceholderColor = TextPlaceholder,
+                errorPlaceholderColor = TextPlaceholder,
+
+                focusedLeadingIconColor = TextPlaceholder,
+                unfocusedLeadingIconColor = TextPlaceholder,
+                errorLeadingIconColor = TextPlaceholder,
+
+                focusedTrailingIconColor = TextPlaceholder,
+                unfocusedTrailingIconColor = TextPlaceholder,
+                errorTrailingIconColor = TextPlaceholder,
+
                 focusedBorderColor = PrimaryBlue,
                 unfocusedBorderColor = BorderGray,
+                errorBorderColor = GoogleRed,
+
                 focusedContainerColor = White,
                 unfocusedContainerColor = White,
-                cursorColor = PrimaryBlue
+                errorContainerColor = White,
+
+                cursorColor = PrimaryBlue,
+                errorCursorColor = GoogleRed
             )
         )
+
+        if (errorMessage.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = errorMessage,
+                color = GoogleRed,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
 

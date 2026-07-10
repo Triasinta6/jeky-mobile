@@ -11,6 +11,7 @@ import id.aejeky.presentation.screen.home.HomeScreen
 import id.aejeky.presentation.screen.login.LoginScreen
 import id.aejeky.presentation.screen.order.OrderScreen
 import id.aejeky.presentation.screen.register.RegisterScreen
+import id.aejeky.presentation.screen.forgotpassword.ForgotPasswordScreen
 
 @Composable
 fun JekyApp() {
@@ -36,6 +37,17 @@ fun JekyApp() {
                 },
                 onRegisterClick = {
                     currentScreen = "register"
+                },
+                onForgotPasswordClick = {
+                    currentScreen = "forgot_password"
+                }
+            )
+        }
+
+        "forgot_password" -> {
+            ForgotPasswordScreen(
+                onBackToLoginClick = {
+                    currentScreen = "login"
                 }
             )
         }
@@ -46,7 +58,7 @@ fun JekyApp() {
                     currentScreen = "login"
                 },
                 onRegisterClick = {
-                    currentScreen = "home"
+                    currentScreen = "login"
                 }
             )
         }

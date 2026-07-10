@@ -1,7 +1,6 @@
 package id.aejeky.presentation.screen.register
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -58,22 +56,50 @@ fun RegisterScreen(
     var emailOrPhone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+
+    var fullNameError by remember { mutableStateOf("") }
+    var emailOrPhoneError by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
+    var confirmPasswordError by remember { mutableStateOf("") }
+
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isConfirmPasswordVisible by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
 
     fun validateRegister() {
-        errorMessage = when {
-            fullName.isBlank() -> "Nama lengkap wajib diisi"
-            emailOrPhone.isBlank() -> "Nomor HP atau Email wajib diisi"
-            password.isBlank() -> "Kata sandi wajib diisi"
-            password.length < 6 -> "Kata sandi minimal 6 karakter"
-            confirmPassword.isBlank() -> "Konfirmasi kata sandi wajib diisi"
-            confirmPassword != password -> "Konfirmasi kata sandi tidak sama"
-            else -> ""
+        fullNameError = ""
+        emailOrPhoneError = ""
+        passwordError = ""
+        confirmPasswordError = ""
+
+        var isValid = true
+
+        if (fullName.isBlank()) {
+            fullNameError = "Nama lengkap wajib diisi"
+            isValid = false
         }
 
-        if (errorMessage.isEmpty()) {
+        if (emailOrPhone.isBlank()) {
+            emailOrPhoneError = "Nomor HP atau Email wajib diisi"
+            isValid = false
+        }
+
+        if (password.isBlank()) {
+            passwordError = "Kata sandi wajib diisi"
+            isValid = false
+        } else if (password.length < 6) {
+            passwordError = "Kata sandi minimal 6 karakter"
+            isValid = false
+        }
+
+        if (confirmPassword.isBlank()) {
+            confirmPasswordError = "Konfirmasi kata sandi wajib diisi"
+            isValid = false
+        } else if (confirmPassword != password) {
+            confirmPasswordError = "Konfirmasi kata sandi tidak sama"
+            isValid = false
+        }
+
+        if (isValid) {
             onRegisterClick()
         }
     }
@@ -87,17 +113,17 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Spacer(modifier = Modifier.height(42.dp))
+        Spacer(modifier = Modifier.height(34.dp))
 
         RegisterHeader()
 
-        Spacer(modifier = Modifier.height(34.dp))
+        Spacer(modifier = Modifier.height(26.dp))
 
         RegisterInputField(
             value = fullName,
             onValueChange = {
                 fullName = it
-                errorMessage = ""
+                fullNameError = ""
             },
             title = "Nama Lengkap",
             placeholder = "Masukkan nama lengkap",
@@ -107,16 +133,17 @@ fun RegisterScreen(
                     contentDescription = "Nama Lengkap",
                     tint = TextPlaceholder
                 )
-            }
+            },
+            errorMessage = fullNameError
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         RegisterInputField(
             value = emailOrPhone,
             onValueChange = {
                 emailOrPhone = it
-                errorMessage = ""
+                emailOrPhoneError = ""
             },
             title = "Nomor HP atau Email",
             placeholder = "Masukkan nomor HP atau email",
@@ -126,16 +153,17 @@ fun RegisterScreen(
                     contentDescription = "Nomor HP atau Email",
                     tint = TextPlaceholder
                 )
-            }
+            },
+            errorMessage = emailOrPhoneError
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         RegisterInputField(
             value = password,
             onValueChange = {
                 password = it
-                errorMessage = ""
+                passwordError = ""
             },
             title = "Kata Sandi",
             placeholder = "Masukkan kata sandi",
@@ -164,16 +192,17 @@ fun RegisterScreen(
                 }
             },
             isPassword = true,
-            isPasswordVisible = isPasswordVisible
+            isPasswordVisible = isPasswordVisible,
+            errorMessage = passwordError
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         RegisterInputField(
             value = confirmPassword,
             onValueChange = {
                 confirmPassword = it
-                errorMessage = ""
+                confirmPasswordError = ""
             },
             title = "Konfirmasi Kata Sandi",
             placeholder = "Ulangi kata sandi",
@@ -202,22 +231,11 @@ fun RegisterScreen(
                 }
             },
             isPassword = true,
-            isPasswordVisible = isConfirmPasswordVisible
+            isPasswordVisible = isConfirmPasswordVisible,
+            errorMessage = confirmPasswordError
         )
 
-        if (errorMessage.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = errorMessage,
-                modifier = Modifier.fillMaxWidth(),
-                color = GoogleRed,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
-
-        Spacer(modifier = Modifier.height(22.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = {
@@ -239,7 +257,7 @@ fun RegisterScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(22.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -298,7 +316,8 @@ private fun RegisterInputField(
     leadingIcon: @Composable () -> Unit,
     trailingIcon: @Composable (() -> Unit)? = null,
     isPassword: Boolean = false,
-    isPasswordVisible: Boolean = false
+    isPasswordVisible: Boolean = false,
+    errorMessage: String = ""
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -328,6 +347,7 @@ private fun RegisterInputField(
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
             singleLine = true,
+            isError = errorMessage.isNotEmpty(),
             shape = RoundedCornerShape(14.dp),
             visualTransformation = if (isPassword && !isPasswordVisible) {
                 PasswordVisualTransformation()
@@ -335,12 +355,44 @@ private fun RegisterInputField(
                 VisualTransformation.None
             },
             colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                errorTextColor = TextPrimary,
+
+                focusedPlaceholderColor = TextPlaceholder,
+                unfocusedPlaceholderColor = TextPlaceholder,
+                errorPlaceholderColor = TextPlaceholder,
+
+                focusedLeadingIconColor = TextPlaceholder,
+                unfocusedLeadingIconColor = TextPlaceholder,
+                errorLeadingIconColor = TextPlaceholder,
+
+                focusedTrailingIconColor = TextPlaceholder,
+                unfocusedTrailingIconColor = TextPlaceholder,
+                errorTrailingIconColor = TextPlaceholder,
+
                 focusedBorderColor = PrimaryBlue,
                 unfocusedBorderColor = BorderGray,
+                errorBorderColor = GoogleRed,
+
                 focusedContainerColor = White,
                 unfocusedContainerColor = White,
-                cursorColor = PrimaryBlue
+                errorContainerColor = White,
+
+                cursorColor = PrimaryBlue,
+                errorCursorColor = GoogleRed
             )
         )
+
+        if (errorMessage.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = errorMessage,
+                color = GoogleRed,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
