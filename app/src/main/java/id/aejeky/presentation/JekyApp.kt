@@ -85,6 +85,11 @@ fun JekyApp() {
                 onServiceClick = { service ->
                     selectedService = service
                     currentScreen = "order"
+                },
+                onLogoutClick = {
+                    sessionManager.clearSession()
+                    selectedService = null
+                    currentScreen = "first"
                 }
             )
         }
