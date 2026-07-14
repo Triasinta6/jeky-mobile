@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import id.aejeky.data.api.ApiClient
+import id.aejeky.data.model.MobileRegisterRequest
 import id.aejeky.presentation.theme.BorderGray
 import id.aejeky.presentation.theme.GoogleRed
 import id.aejeky.presentation.theme.PrimaryBlue
@@ -46,6 +49,7 @@ import id.aejeky.presentation.theme.TextPlaceholder
 import id.aejeky.presentation.theme.TextPrimary
 import id.aejeky.presentation.theme.TextSecondary
 import id.aejeky.presentation.theme.White
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(
@@ -65,11 +69,17 @@ fun RegisterScreen(
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isConfirmPasswordVisible by remember { mutableStateOf(false) }
 
-    fun validateRegister() {
+    var isLoading by remember { mutableStateOf(false) }
+    var apiMessage by remember { mutableStateOf("") }
+
+    val scope = rememberCoroutineScope()
+
+    fun validateRegister(): Boolean {
         fullNameError = ""
         emailOrPhoneError = ""
         passwordError = ""
         confirmPasswordError = ""
+        apiMessage = ""
 
         var isValid = true
 
@@ -99,8 +109,43 @@ fun RegisterScreen(
             isValid = false
         }
 
-        if (isValid) {
-            onRegisterClick()
+        return isValid
+    }
+
+    fun registerCustomer() {
+        if (!validateRegister()) {
+            return
+        }
+
+        scope.launch {
+            isLoading = true
+
+            try {
+                val response = ApiClient.service.registerCustomer(
+                    MobileRegisterRequest(
+                        name = fullName,
+                        emailOrPhone = emailOrPhone,
+                        password = password,
+                        confirmPassword = confirmPassword
+                    )
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    if (body?.success == true) {
+                        onRegisterClick()
+                    } else {
+                        apiMessage = body?.message ?: "Registrasi gagal"
+                    }
+                } else {
+                    apiMessage = "Registrasi gagal. Coba lagi."
+                }
+            } catch (e: Exception) {
+                apiMessage = "Tidak dapat terhubung ke server"
+            } finally {
+                isLoading = false
+            }
         }
     }
 
@@ -124,6 +169,7 @@ fun RegisterScreen(
             onValueChange = {
                 fullName = it
                 fullNameError = ""
+                apiMessage = ""
             },
             title = "Nama Lengkap",
             placeholder = "Masukkan nama lengkap",
@@ -144,6 +190,7 @@ fun RegisterScreen(
             onValueChange = {
                 emailOrPhone = it
                 emailOrPhoneError = ""
+                apiMessage = ""
             },
             title = "Nomor HP atau Email",
             placeholder = "Masukkan nomor HP atau email",
@@ -164,6 +211,7 @@ fun RegisterScreen(
             onValueChange = {
                 password = it
                 passwordError = ""
+                apiMessage = ""
             },
             title = "Kata Sandi",
             placeholder = "Masukkan kata sandi",
@@ -203,6 +251,7 @@ fun RegisterScreen(
             onValueChange = {
                 confirmPassword = it
                 confirmPasswordError = ""
+                apiMessage = ""
             },
             title = "Konfirmasi Kata Sandi",
             placeholder = "Ulangi kata sandi",
@@ -237,10 +286,22 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        if (apiMessage.isNotEmpty()) {
+            Text(
+                text = apiMessage,
+                color = GoogleRed,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
         Button(
             onClick = {
-                validateRegister()
+                registerCustomer()
             },
+            enabled = !isLoading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -250,7 +311,7 @@ fun RegisterScreen(
             )
         ) {
             Text(
-                text = "Daftar",
+                text = if (isLoading) "Memproses..." else "Daftar",
                 color = White,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
