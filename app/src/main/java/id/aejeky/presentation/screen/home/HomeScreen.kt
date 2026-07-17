@@ -65,7 +65,8 @@ import id.aejeky.presentation.theme.White
 @Composable
 fun HomeScreen(
     onServiceClick: (Layanan) -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -372,7 +373,11 @@ fun HomeScreen(
         JekyBottomNavigationBar(
             selectedMenu = selectedBottomMenu,
             onMenuClick = { menu: String ->
-                selectedBottomMenu = menu
+                if (menu == "profile") {
+                    onProfileClick()
+                } else {
+                    selectedBottomMenu = menu
+                }
             },
             modifier = Modifier
                 .align(Alignment.BottomCenter)

@@ -54,6 +54,22 @@ class SessionManager(context: Context) {
         sharedPreferences.edit().clear().apply()
     }
 
+    fun getAddress(): String {
+        return sharedPreferences.getString(KEY_ADDRESS, "") ?: ""
+    }
+
+    fun updateProfileSession(
+        name: String,
+        noHp: String?,
+        address: String?
+    ) {
+        sharedPreferences.edit()
+            .putString(KEY_NAME, name)
+            .putString(KEY_NO_HP, noHp)
+            .putString(KEY_ADDRESS, address)
+            .apply()
+    }
+
     companion object {
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
         private const val KEY_TOKEN = "token"
@@ -61,5 +77,6 @@ class SessionManager(context: Context) {
         private const val KEY_NAME = "name"
         private const val KEY_EMAIL = "email"
         private const val KEY_NO_HP = "no_hp"
+        private const val KEY_ADDRESS = "address"
     }
 }

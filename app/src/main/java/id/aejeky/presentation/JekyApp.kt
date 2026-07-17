@@ -14,6 +14,7 @@ import id.aejeky.presentation.screen.home.HomeScreen
 import id.aejeky.presentation.screen.login.LoginScreen
 import id.aejeky.presentation.screen.order.OrderScreen
 import id.aejeky.presentation.screen.register.RegisterScreen
+import id.aejeky.presentation.screen.profile.ProfileScreen
 
 @Composable
 fun JekyApp() {
@@ -90,6 +91,9 @@ fun JekyApp() {
                     sessionManager.clearSession()
                     selectedService = null
                     currentScreen = "first"
+                },
+                onProfileClick = {
+                    currentScreen = "profile"
                 }
             )
         }
@@ -106,6 +110,19 @@ fun JekyApp() {
             } ?: run {
                 currentScreen = "home"
             }
+        }
+
+        "profile" -> {
+            ProfileScreen(
+                onBackClick = {
+                    currentScreen = "home"
+                },
+                onLogoutClick = {
+                    sessionManager.clearSession()
+                    selectedService = null
+                    currentScreen = "first"
+                }
+            )
         }
     }
 }

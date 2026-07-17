@@ -3,7 +3,7 @@ package id.aejeky.data.api
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-private const val BASE_URL = "http://172.16.171.9:8080/api/"
+private const val BASE_URL = "http://172.16.171.26:8080/api/"
 
 object ApiClient {
     val service: JekyApiService by lazy {
