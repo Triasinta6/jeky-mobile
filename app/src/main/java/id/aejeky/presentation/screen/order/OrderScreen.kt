@@ -64,7 +64,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun OrderScreen(
     service: Layanan,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onOrderSuccess: () -> Unit
 ) {
     val context = LocalContext.current
     val sessionManager = remember {
@@ -118,6 +119,7 @@ fun OrderScreen(
 
                 isSuccessMessage = true
                 message = "Order berhasil dibuat"
+                onOrderSuccess()
             } catch (e: Exception) {
                 isSuccessMessage = false
                 message = e.message ?: "Gagal membuat order"

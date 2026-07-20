@@ -118,6 +118,10 @@ fun JekyApp() {
                     onBackClick = {
                         selectedService = null
                         currentScreen = "home"
+                    },
+                    onOrderSuccess = {
+                        selectedService = null
+                        currentScreen = "order_history"
                     }
                 )
             } ?: run {
