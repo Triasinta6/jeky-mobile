@@ -8,6 +8,7 @@ import id.aejeky.data.model.OrderRequest
 import id.aejeky.data.model.OrderResponse
 import id.aejeky.data.model.ProfileResponse
 import id.aejeky.data.model.ProfileRequest
+import id.aejeky.data.model.OrderHistoryResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -42,4 +43,9 @@ interface JekyApiService {
         @Path("customerId") customerId: Long,
         @Body request: ProfileRequest
     ): ProfileResponse
+
+    @GET("orders/customer/{customerId}")
+    suspend fun getCustomerOrders(
+        @Path("customerId") customerId: Long
+    ): List<OrderHistoryResponse>
 }

@@ -66,7 +66,8 @@ import id.aejeky.presentation.theme.White
 fun HomeScreen(
     onServiceClick: (Layanan) -> Unit,
     onLogoutClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onOrderHistoryClick: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -373,10 +374,18 @@ fun HomeScreen(
         JekyBottomNavigationBar(
             selectedMenu = selectedBottomMenu,
             onMenuClick = { menu: String ->
-                if (menu == "profile") {
-                    onProfileClick()
-                } else {
-                    selectedBottomMenu = menu
+                when (menu) {
+                    "profile" -> {
+                        onProfileClick()
+                    }
+
+                    "order" -> {
+                        onOrderHistoryClick()
+                    }
+
+                    else -> {
+                        selectedBottomMenu = menu
+                    }
                 }
             },
             modifier = Modifier

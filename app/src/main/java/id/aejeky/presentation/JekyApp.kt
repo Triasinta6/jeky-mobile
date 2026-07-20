@@ -15,6 +15,7 @@ import id.aejeky.presentation.screen.login.LoginScreen
 import id.aejeky.presentation.screen.order.OrderScreen
 import id.aejeky.presentation.screen.register.RegisterScreen
 import id.aejeky.presentation.screen.profile.ProfileScreen
+import id.aejeky.presentation.screen.order.OrderHistoryScreen
 
 @Composable
 fun JekyApp() {
@@ -94,6 +95,9 @@ fun JekyApp() {
                 },
                 onProfileClick = {
                     currentScreen = "profile"
+                },
+                onOrderHistoryClick = {
+                    currentScreen = "order_history"
                 }
             )
         }
@@ -110,6 +114,14 @@ fun JekyApp() {
             } ?: run {
                 currentScreen = "home"
             }
+        }
+
+        "order_history" -> {
+            OrderHistoryScreen(
+                onBackClick = {
+                    currentScreen = "home"
+                }
+            )
         }
 
         "profile" -> {
