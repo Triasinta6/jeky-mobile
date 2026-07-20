@@ -79,7 +79,7 @@ fun OrderHistoryScreen(
             .fillMaxSize()
             .background(ScreenBackground)
             .verticalScroll(rememberScrollState())
-            .padding(20.dp)
+            .padding(horizontal = 20.dp, vertical = 32.dp)
     ) {
         Button(
             onClick = onBackClick,
@@ -206,8 +206,8 @@ private fun OrderHistoryCard(
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
-            text = "Status: ${order.status ?: "-"}",
-            color = if (order.status == "WAITING") SuccessGreen else TextSecondary,
+            text = "Status: ${getOrderStatusLabel(order.status)}",
+            color = getOrderStatusColor(order.status),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
@@ -215,9 +215,53 @@ private fun OrderHistoryCard(
         Spacer(modifier = Modifier.height(5.dp))
 
         Text(
-            text = order.createdAt ?: "",
+            text = formatOrderDate(order.createdAt),
             color = TextSecondary,
             fontSize = 12.sp
         )
+    }
+}
+
+private fun getOrderStatusLabel(status: String?): String {
+    return when (status) {
+        "WAITING" -> "Menunggu"
+        "ACCEPTED" -> "Diterima"
+        "ON_PROGRESS" -> "Diproses"
+        "COMPLETED" -> "Selesai"
+        "CANCELLED" -> "Dibatalkan"
+        else -> status ?: "-"
+    }
+}
+
+private fun getOrderStatusColor(status: String?): androidx.compose.ui.graphics.Color {
+    return when (status) {
+        "WAITING" -> PrimaryBlue
+        "ACCEPTED" -> SuccessGreen
+        "ON_PROGRESS" -> PrimaryBlue
+        "COMPLETED" -> SuccessGreen
+        "CANCELLED" -> ErrorRed
+        else -> TextSecondary
+    }
+}
+
+private fun formatOrderDate(createdAt: String?): String {
+    if (createdAt.isNullOrBlank()) {
+        return "-"
+    }
+
+    return try {
+        val dateTimeParts = createdAt.split("T")
+        val dateParts = dateTimeParts[0].split("-")
+        val timeParts = dateTimeParts[1].split(":")
+
+        val year = dateParts[0]
+        val month = dateParts[1]
+        val day = dateParts[2]
+        val hour = timeParts[0]
+        val minute = timeParts[1]
+
+        "$day/$month/$year, $hour:$minute"
+    } catch (e: Exception) {
+        createdAt
     }
 }
