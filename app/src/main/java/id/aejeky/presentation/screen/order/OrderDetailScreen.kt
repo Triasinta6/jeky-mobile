@@ -2,6 +2,7 @@ package id.aejeky.presentation.screen.order
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,21 +18,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.clickable
-import id.aejeky.data.api.ApiClient
-import id.aejeky.data.local.SessionManager
 import id.aejeky.data.model.OrderHistoryResponse
 import id.aejeky.presentation.theme.ErrorRed
 import id.aejeky.presentation.theme.PrimaryBlue
@@ -43,39 +35,10 @@ import id.aejeky.presentation.theme.White
 import id.aejeky.util.formatRupiah
 
 @Composable
-fun OrderHistoryScreen(
-    onBackClick: () -> Unit,
-    onOrderClick: (OrderHistoryResponse) -> Unit
+fun OrderDetailScreen(
+    order: OrderHistoryResponse,
+    onBackClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    val sessionManager = remember {
-        SessionManager(context)
-    }
-
-    var orders by remember {
-        mutableStateOf<List<OrderHistoryResponse>>(emptyList())
-    }
-
-    var isLoading by remember {
-        mutableStateOf(true)
-    }
-
-    var errorMessage by remember {
-        mutableStateOf("")
-    }
-
-    LaunchedEffect(Unit) {
-        try {
-            orders = ApiClient.service.getCustomerOrders(
-                customerId = sessionManager.getCustomerId()
-            )
-        } catch (e: Exception) {
-            errorMessage = e.message ?: "Gagal memuat riwayat order"
-        } finally {
-            isLoading = false
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,7 +67,7 @@ fun OrderHistoryScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "Riwayat Order",
+            text = "Detail Order",
             color = TextPrimary,
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold
@@ -113,122 +76,158 @@ fun OrderHistoryScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Daftar pesanan yang pernah kamu buat.",
+            text = "Informasi lengkap pesanan kamu.",
             color = TextSecondary,
             fontSize = 14.sp
         )
 
         Spacer(modifier = Modifier.height(22.dp))
 
-        when {
-            isLoading -> {
-                Text(
-                    text = "Memuat riwayat order...",
-                    color = TextSecondary,
-                    fontSize = 14.sp
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 5.dp,
+                    shape = RoundedCornerShape(22.dp),
+                    clip = false
                 )
-            }
+                .clip(RoundedCornerShape(22.dp))
+                .background(White)
+                .padding(18.dp)
+        ) {
+            Text(
+                text = order.layanan?.nama ?: "Layanan Jeky",
+                color = TextPrimary,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
 
-            errorMessage.isNotEmpty() -> {
-                Text(
-                    text = errorMessage,
-                    color = ErrorRed,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            Spacer(modifier = Modifier.height(6.dp))
 
-            orders.isEmpty() -> {
-                Text(
-                    text = "Belum ada riwayat order.",
-                    color = TextSecondary,
-                    fontSize = 14.sp
-                )
-            }
+            Text(
+                text = formatRupiah(order.layanan?.hargaDasar ?: 0),
+                color = PrimaryBlue,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
 
-            else -> {
-                orders.forEach { order ->
-                    OrderHistoryCard(
-                        order = order,
-                        onClick = {
-                            onOrderClick(order)
-                        }
-                    )
+            Spacer(modifier = Modifier.height(14.dp))
 
-                    Spacer(modifier = Modifier.height(14.dp))
-                }
-            }
+            Text(
+                text = getOrderStatusLabel(order.status),
+                color = getOrderStatusColor(order.status),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        DetailSection(title = "Informasi Perjalanan") {
+            DetailRow(
+                label = "Lokasi Jemput",
+                value = order.pickupAddress ?: "-"
+            )
+
+            DetailRow(
+                label = "Tujuan",
+                value = order.destinationAddress ?: "-"
+            )
+
+            DetailRow(
+                label = "Catatan",
+                value = order.note ?: "-"
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        DetailSection(title = "Informasi Customer") {
+            DetailRow(
+                label = "Nama",
+                value = order.customerName ?: "-"
+            )
+
+            DetailRow(
+                label = "Nomor HP",
+                value = order.phoneNumber ?: "-"
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        DetailSection(title = "Informasi Order") {
+            DetailRow(
+                label = "ID Order",
+                value = "#${order.id}"
+            )
+
+            DetailRow(
+                label = "Tanggal Order",
+                value = formatOrderDate(order.createdAt)
+            )
+
+            DetailRow(
+                label = "Status",
+                value = getOrderStatusLabel(order.status)
+            )
         }
     }
 }
 
 @Composable
-private fun OrderHistoryCard(
-    order: OrderHistoryResponse,
-    onClick: () -> Unit
+private fun DetailSection(
+    title: String,
+    content: @Composable () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                onClick()
-            }
             .shadow(
-                elevation = 5.dp,
-                shape = RoundedCornerShape(22.dp),
+                elevation = 4.dp,
+                shape = RoundedCornerShape(20.dp),
                 clip = false
             )
-            .clip(RoundedCornerShape(22.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(White)
             .padding(18.dp)
     ) {
         Text(
-            text = order.layanan?.nama ?: "Layanan Jeky",
+            text = title,
             color = TextPrimary,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Text(
-            text = formatRupiah(order.layanan?.hargaDasar ?: 0),
-            color = PrimaryBlue,
-            fontSize = 15.sp,
+            fontSize = 17.sp,
             fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        content()
+    }
+}
+
+@Composable
+private fun DetailRow(
+    label: String,
+    value: String
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+    ) {
         Text(
-            text = "Dari: ${order.pickupAddress ?: "-"}",
-            color = TextPrimary,
-            fontSize = 14.sp
-        )
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        Text(
-            text = "Ke: ${order.destinationAddress ?: "-"}",
-            color = TextPrimary,
-            fontSize = 14.sp
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(
-            text = "Status: ${getOrderStatusLabel(order.status)}",
-            color = getOrderStatusColor(order.status),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        Text(
-            text = formatOrderDate(order.createdAt),
+            text = label,
             color = TextSecondary,
-            fontSize = 12.sp
+            fontSize = 13.sp
+        )
+
+        Spacer(modifier = Modifier.height(3.dp))
+
+        Text(
+            text = value,
+            color = TextPrimary,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Medium
         )
     }
 }

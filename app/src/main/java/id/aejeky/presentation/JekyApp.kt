@@ -8,14 +8,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import id.aejeky.data.local.SessionManager
 import id.aejeky.data.model.Layanan
+import id.aejeky.data.model.OrderHistoryResponse
 import id.aejeky.presentation.screen.first.FirstScreen
 import id.aejeky.presentation.screen.forgotpassword.ForgotPasswordScreen
 import id.aejeky.presentation.screen.home.HomeScreen
 import id.aejeky.presentation.screen.login.LoginScreen
-import id.aejeky.presentation.screen.order.OrderScreen
-import id.aejeky.presentation.screen.register.RegisterScreen
-import id.aejeky.presentation.screen.profile.ProfileScreen
+import id.aejeky.presentation.screen.order.OrderDetailScreen
 import id.aejeky.presentation.screen.order.OrderHistoryScreen
+import id.aejeky.presentation.screen.order.OrderScreen
+import id.aejeky.presentation.screen.profile.ProfileScreen
+import id.aejeky.presentation.screen.register.RegisterScreen
 
 @Composable
 fun JekyApp() {
@@ -35,7 +37,13 @@ fun JekyApp() {
         )
     }
 
-    var selectedService by remember { mutableStateOf<Layanan?>(null) }
+    var selectedService by remember {
+        mutableStateOf<Layanan?>(null)
+    }
+
+    var selectedOrder by remember {
+        mutableStateOf<OrderHistoryResponse?>(null)
+    }
 
     when (currentScreen) {
         "first" -> {
@@ -91,6 +99,7 @@ fun JekyApp() {
                 onLogoutClick = {
                     sessionManager.clearSession()
                     selectedService = null
+                    selectedOrder = null
                     currentScreen = "first"
                 },
                 onProfileClick = {
@@ -120,8 +129,25 @@ fun JekyApp() {
             OrderHistoryScreen(
                 onBackClick = {
                     currentScreen = "home"
+                },
+                onOrderClick = { order ->
+                    selectedOrder = order
+                    currentScreen = "order_detail"
                 }
             )
+        }
+
+        "order_detail" -> {
+            selectedOrder?.let { order ->
+                OrderDetailScreen(
+                    order = order,
+                    onBackClick = {
+                        currentScreen = "order_history"
+                    }
+                )
+            } ?: run {
+                currentScreen = "order_history"
+            }
         }
 
         "profile" -> {
@@ -132,6 +158,7 @@ fun JekyApp() {
                 onLogoutClick = {
                     sessionManager.clearSession()
                     selectedService = null
+                    selectedOrder = null
                     currentScreen = "first"
                 }
             )
