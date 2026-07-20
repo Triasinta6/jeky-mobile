@@ -178,9 +178,17 @@ fun OrderScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            LocationSummaryCard(
+            LocationInputCard(
                 pickupAddress = pickupAddress,
-                destinationAddress = destinationAddress
+                onPickupAddressChange = {
+                    pickupAddress = it
+                    message = ""
+                },
+                destinationAddress = destinationAddress,
+                onDestinationAddressChange = {
+                    destinationAddress = it
+                    message = ""
+                }
             )
 
             Spacer(modifier = Modifier.height(22.dp))
@@ -199,39 +207,6 @@ fun OrderScreen(
             )
 
             Spacer(modifier = Modifier.height(22.dp))
-
-            Text(
-                text = "Detail Perjalanan",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OrderInputField(
-                value = pickupAddress,
-                onValueChange = {
-                    pickupAddress = it
-                    message = ""
-                },
-                title = "Lokasi Jemput",
-                placeholder = "Masukkan lokasi jemput"
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OrderInputField(
-                value = destinationAddress,
-                onValueChange = {
-                    destinationAddress = it
-                    message = ""
-                },
-                title = "Tujuan",
-                placeholder = "Masukkan tujuan"
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
 
             OrderInputField(
                 value = note,
@@ -347,9 +322,11 @@ private fun MapPreviewCard() {
 }
 
 @Composable
-private fun LocationSummaryCard(
+private fun LocationInputCard(
     pickupAddress: String,
-    destinationAddress: String
+    onPickupAddressChange: (String) -> Unit,
+    destinationAddress: String,
+    onDestinationAddressChange: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -363,9 +340,11 @@ private fun LocationSummaryCard(
             .background(White)
             .padding(18.dp)
     ) {
-        LocationRow(
+        LocationInputRow(
             title = "Lokasi Jemput",
-            value = pickupAddress.ifBlank { "Pilih lokasi jemput" },
+            value = pickupAddress,
+            onValueChange = onPickupAddressChange,
+            placeholder = "Masukkan lokasi jemput",
             color = SuccessGreen
         )
 
@@ -380,18 +359,22 @@ private fun LocationSummaryCard(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        LocationRow(
+        LocationInputRow(
             title = "Tujuan",
-            value = destinationAddress.ifBlank { "Pilih lokasi tujuan" },
+            value = destinationAddress,
+            onValueChange = onDestinationAddressChange,
+            placeholder = "Masukkan lokasi tujuan",
             color = ErrorRed
         )
     }
 }
 
 @Composable
-private fun LocationRow(
+private fun LocationInputRow(
     title: String,
     value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
     color: Color
 ) {
     Row(
@@ -420,26 +403,38 @@ private fun LocationRow(
         ) {
             Text(
                 text = title,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 color = TextSecondary
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = value,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                placeholder = {
+                    Text(
+                        text = placeholder,
+                        color = TextPlaceholder,
+                        fontSize = 14.sp
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    focusedBorderColor = PrimaryBlue,
+                    unfocusedBorderColor = BorderGray,
+                    focusedContainerColor = White,
+                    unfocusedContainerColor = White,
+                    cursorColor = PrimaryBlue
+                )
             )
         }
-
-        Icon(
-            imageVector = Icons.Default.KeyboardArrowRight,
-            contentDescription = "Pilih $title",
-            tint = TextPlaceholder,
-            modifier = Modifier.size(24.dp)
-        )
     }
 }
 
