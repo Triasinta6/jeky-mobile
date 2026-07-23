@@ -216,11 +216,8 @@ private fun OrderHistoryCard(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
-            text = "Status: ${getOrderStatusLabel(order.status)}",
-            color = getOrderStatusColor(order.status),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
+        StatusBadge(
+            status = order.status
         )
 
         Spacer(modifier = Modifier.height(5.dp))
@@ -231,6 +228,22 @@ private fun OrderHistoryCard(
             fontSize = 12.sp
         )
     }
+}
+
+@Composable
+private fun StatusBadge(
+    status: String?
+) {
+    Text(
+        text = getOrderStatusLabel(status),
+        color = getOrderStatusColor(status),
+        fontSize = 13.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50.dp))
+            .background(getOrderStatusColor(status).copy(alpha = 0.12f))
+            .padding(horizontal = 12.dp, vertical = 7.dp)
+    )
 }
 
 private fun getOrderStatusLabel(status: String?): String {
