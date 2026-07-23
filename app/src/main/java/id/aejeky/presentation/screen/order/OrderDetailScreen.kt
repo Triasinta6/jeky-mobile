@@ -247,11 +247,11 @@ private fun StatusBadge(
 
 private fun getOrderStatusLabel(status: String?): String {
     return when (status) {
-        "WAITING" -> "Menunggu"
-        "ACCEPTED" -> "Diterima"
-        "ON_PROGRESS" -> "Diproses"
-        "COMPLETED" -> "Selesai"
-        "CANCELLED" -> "Dibatalkan"
+        "WAITING" -> "Waiting"
+        "ACCEPTED" -> "Accepted"
+        "ON_PROGRESS" -> "On Progress"
+        "COMPLETED" -> "Completed"
+        "CANCELLED" -> "Cancelled"
         else -> status ?: "-"
     }
 }
