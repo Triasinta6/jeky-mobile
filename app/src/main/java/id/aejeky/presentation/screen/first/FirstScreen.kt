@@ -87,16 +87,7 @@ fun FirstScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Dot(isActive = true)
-                Dot(isActive = false)
-                Dot(isActive = false)
-            }
-
-            Spacer(modifier = Modifier.height(44.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = onStartClick,
