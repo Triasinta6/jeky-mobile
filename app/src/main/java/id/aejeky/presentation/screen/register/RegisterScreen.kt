@@ -1,5 +1,8 @@
 package id.aejeky.presentation.screen.register
 
+import android.widget.Toast
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,13 +38,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import id.aejeky.data.api.ApiClient
+import id.aejeky.data.model.MobileRegisterRequest
 import id.aejeky.presentation.theme.BorderGray
 import id.aejeky.presentation.theme.GoogleRed
 import id.aejeky.presentation.theme.PrimaryBlue
@@ -50,6 +54,7 @@ import id.aejeky.presentation.theme.TextPlaceholder
 import id.aejeky.presentation.theme.TextPrimary
 import id.aejeky.presentation.theme.TextSecondary
 import id.aejeky.presentation.theme.White
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(
@@ -69,7 +74,13 @@ fun RegisterScreen(
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isConfirmPasswordVisible by remember { mutableStateOf(false) }
 
-    fun validateRegister() {
+    var isLoading by remember { mutableStateOf(false) }
+    var apiMessage by remember { mutableStateOf("") }
+
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    fun validateRegister(): Boolean {
         fullNameError = ""
         emailOrPhoneError = ""
         passwordError = ""
@@ -77,21 +88,34 @@ fun RegisterScreen(
 
         var isValid = true
 
-        if (fullName.isBlank()) {
+        val cleanName = fullName.trim()
+        val cleanEmailOrPhone = emailOrPhone.trim()
+
+        if (cleanName.isBlank()) {
             fullNameError = "Nama lengkap wajib diisi"
             isValid = false
         }
 
-        if (emailOrPhone.isBlank()) {
+        val isEmail = android.util.Patterns.EMAIL_ADDRESS
+            .matcher(cleanEmailOrPhone)
+            .matches()
+
+        val phoneRegex = Regex("^(\\+62|62|0)8[1-9][0-9]{7,11}$")
+        val isPhone = phoneRegex.matches(cleanEmailOrPhone)
+
+        if (cleanEmailOrPhone.isBlank()) {
             emailOrPhoneError = "Nomor HP atau Email wajib diisi"
+            isValid = false
+        } else if (!isEmail && !isPhone) {
+            emailOrPhoneError = "Masukkan email atau nomor HP yang valid"
             isValid = false
         }
 
         if (password.isBlank()) {
             passwordError = "Kata sandi wajib diisi"
             isValid = false
-        } else if (password.length < 6) {
-            passwordError = "Kata sandi minimal 6 karakter"
+        } else if (password.length < 8) {
+            passwordError = "Kata sandi minimal 8 karakter"
             isValid = false
         }
 
@@ -104,7 +128,55 @@ fun RegisterScreen(
         }
 
         if (isValid) {
-            onRegisterClick()
+            fullName = cleanName
+            emailOrPhone = cleanEmailOrPhone
+        }
+
+        return isValid
+    }
+
+    fun registerCustomer() {
+        if(!validateRegister()) {
+            return
+        }
+
+        scope.launch {
+            isLoading = true
+            apiMessage = ""
+
+            try {
+                val response = ApiClient.service.registerCustomer(
+                    MobileRegisterRequest(
+                        name = fullName.trim(),
+                        emailOrPhone = emailOrPhone.trim(),
+                        password = password,
+                        confirmPassword = confirmPassword
+                    )
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    if (body?.success == true) {
+                        Toast.makeText(
+                            context,
+                            "Registrasi berhasil. Silakan masuk.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        onRegisterClick()
+
+                    } else {
+                        apiMessage = body?.message ?: "Registrasi gagal"
+                    }
+                } else {
+                    apiMessage = "Registrasi gagal. Coba lagi."
+                }
+            } catch (e: Exception) {
+                apiMessage = "Tidak dapat terhubung ke server"
+            } finally {
+                isLoading = false
+            }
         }
     }
 
@@ -221,7 +293,8 @@ fun RegisterScreen(
             },
             isPassword = true,
             isPasswordVisible = isPasswordVisible,
-            errorMessage = passwordError
+            errorMessage = passwordError,
+            helperText = "Minimal 8 karakter"
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -267,8 +340,10 @@ fun RegisterScreen(
 
         Button(
             onClick = {
-                validateRegister()
+                registerCustomer()
             },
+            enabled = !isLoading,
+
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -278,7 +353,7 @@ fun RegisterScreen(
             )
         ) {
             Text(
-                text = "Daftar",
+                text = if (isLoading) "Memproses..." else "Daftar",
                 color = White,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
@@ -286,6 +361,17 @@ fun RegisterScreen(
         }
 
         Spacer(modifier = Modifier.height(20.dp))
+
+        if (apiMessage.isNotEmpty()) {
+            Text(
+                text = apiMessage,
+                color = GoogleRed,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -345,7 +431,8 @@ private fun RegisterInputField(
     trailingIcon: @Composable (() -> Unit)? = null,
     isPassword: Boolean = false,
     isPasswordVisible: Boolean = false,
-    errorMessage: String = ""
+    errorMessage: String = "",
+    helperText: String = ""
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -420,6 +507,14 @@ private fun RegisterInputField(
                 color = GoogleRed,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium
+            )
+        } else if (helperText.isNotEmpty()){
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = helperText,
+                color = TextSecondary,
+                fontSize = 12.sp
             )
         }
     }

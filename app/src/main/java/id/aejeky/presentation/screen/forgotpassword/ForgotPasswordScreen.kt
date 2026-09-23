@@ -1,5 +1,6 @@
 package id.aejeky.presentation.screen.forgotpassword
 
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +29,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import id.aejeky.data.api.ApiClient
+import id.aejeky.data.model.ForgotPasswordRequest
 import id.aejeky.presentation.theme.BorderGray
 import id.aejeky.presentation.theme.GoogleRed
 import id.aejeky.presentation.theme.PrimaryBlue
@@ -53,14 +58,62 @@ fun ForgotPasswordScreen(
     var emailOrPhoneError by remember { mutableStateOf("") }
     var successMessage by remember { mutableStateOf("") }
 
-    fun validateForgotPassword() {
+    var apiMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+
+    fun validateForgotPassword(): Boolean  {
         emailOrPhoneError = ""
         successMessage = ""
 
-        if (emailOrPhone.isBlank()) {
+        val cleanEmailOrPhone = emailOrPhone.trim()
+
+        if (cleanEmailOrPhone.isBlank()) {
             emailOrPhoneError = "Nomor HP atau Email wajib diisi"
-        } else {
-            successMessage = "Instruksi pemulihan kata sandi berhasil dikirim."
+                return false
+        }
+
+        return true
+    }
+
+    fun sendForgotPassword() {
+        if (!validateForgotPassword()) {
+            return
+        }
+
+        scope.launch {
+            isLoading = true
+            apiMessage = ""
+            successMessage = ""
+
+            try {
+                val response = ApiClient.service.forgotPassword(
+                    ForgotPasswordRequest(
+                        emailOrPhone = emailOrPhone.trim()
+                    )
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    if (body?.success == true) {
+                        successMessage =
+                            body.message.ifBlank {
+                                "Intruksi pemulihan kata sandi berhasil dikirim."
+                            }
+                    } else {
+                        apiMessage =
+                            body?.message ?: "Gagal mingirim intruksi pemulihan."
+                    }
+                } else {
+                    apiMessage = "Gagal mengirim intruksi pemulihan."
+                }
+            } catch (e: Exception) {
+                apiMessage = "Tidak dapat terhubung ke server."
+            } finally {
+                isLoading = false
+            }
         }
     }
 
@@ -111,8 +164,9 @@ fun ForgotPasswordScreen(
 
         SendInstructionButton(
             onClick = {
-                validateForgotPassword()
-            }
+                sendForgotPassword()
+            },
+            isLoading = isLoading
         )
 
         Spacer(modifier = Modifier.height(22.dp))
@@ -258,10 +312,12 @@ private fun ForgotPasswordInputField(
 
 @Composable
 private fun SendInstructionButton(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isLoading: Boolean
 ) {
     Button(
         onClick = onClick,
+        enabled = !isLoading,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
@@ -271,7 +327,7 @@ private fun SendInstructionButton(
         )
     ) {
         Text(
-            text = "Kirim Instruksi",
+            text = if (isLoading) "Mengirim..." else "Kirim Instruksi",
             color = White,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold
