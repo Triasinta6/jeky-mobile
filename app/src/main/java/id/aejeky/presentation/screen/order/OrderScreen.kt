@@ -25,18 +25,29 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import id.aejeky.data.api.ApiClient
+import id.aejeky.data.local.SessionManager
 import id.aejeky.data.model.Layanan
+import id.aejeky.data.model.OrderRequest
 import id.aejeky.presentation.theme.BorderGray
 import id.aejeky.presentation.theme.ErrorRed
 import id.aejeky.presentation.theme.PrimaryBlue
@@ -48,12 +59,76 @@ import id.aejeky.presentation.theme.TextPrimary
 import id.aejeky.presentation.theme.TextSecondary
 import id.aejeky.presentation.theme.White
 import id.aejeky.util.formatRupiah
+import kotlinx.coroutines.launch
 
 @Composable
 fun OrderScreen(
     service: Layanan,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onOrderSuccess: () -> Unit
 ) {
+    val context = LocalContext.current
+    val sessionManager = remember {
+        SessionManager(context)
+    }
+
+    val scope = rememberCoroutineScope()
+
+    var pickupAddress by remember { mutableStateOf("") }
+    var destinationAddress by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
+
+    var message by remember { mutableStateOf("") }
+    var isSuccessMessage by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    fun createOrder() {
+        message = ""
+        isSuccessMessage = false
+
+        if (sessionManager.getNoHp().isBlank()) {
+            message = "Silakan lengkapi nomor HP di profil terlebih dahulu."
+            return
+        }
+
+        if (pickupAddress.isBlank()) {
+            message = "Lokasi jemput wajib diisi"
+            return
+        }
+
+        if (destinationAddress.isBlank()) {
+            message = "Tujuan wajib diisi"
+            return
+        }
+
+        scope.launch {
+            isLoading = true
+
+            try {
+                ApiClient.service.createOrder(
+                    OrderRequest(
+                        customerId = sessionManager.getCustomerId(),
+                        layananId = service.id,
+                        customerName = sessionManager.getName(),
+                        phoneNumber = sessionManager.getNoHp(),
+                        pickupAddress = pickupAddress,
+                        destinationAddress = destinationAddress,
+                        note = note.ifBlank { null }
+                    )
+                )
+
+                isSuccessMessage = true
+                message = "Order berhasil dibuat"
+                onOrderSuccess()
+            } catch (e: Exception) {
+                isSuccessMessage = false
+                message = e.message ?: "Gagal membuat order"
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -105,7 +180,18 @@ fun OrderScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            LocationSummaryCard()
+            LocationInputCard(
+                pickupAddress = pickupAddress,
+                onPickupAddressChange = {
+                    pickupAddress = it
+                    message = ""
+                },
+                destinationAddress = destinationAddress,
+                onDestinationAddressChange = {
+                    destinationAddress = it
+                    message = ""
+                }
+            )
 
             Spacer(modifier = Modifier.height(22.dp))
 
@@ -120,6 +206,18 @@ fun OrderScreen(
 
             SelectedServiceCard(
                 service = service
+            )
+
+            Spacer(modifier = Modifier.height(22.dp))
+
+            OrderInputField(
+                value = note,
+                onValueChange = {
+                    note = it
+                    message = ""
+                },
+                title = "Catatan",
+                placeholder = "Contoh: tunggu di depan gerbang"
             )
 
             Spacer(modifier = Modifier.height(22.dp))
@@ -144,11 +242,22 @@ fun OrderScreen(
 
             Spacer(modifier = Modifier.height(26.dp))
 
+            if (message.isNotEmpty()) {
+                Text(
+                    text = message,
+                    color = if (isSuccessMessage) SuccessGreen else ErrorRed,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
             Button(
                 onClick = {
-                    // Tampilan dulu.
-                    // Nanti setelah login + profile selesai, baru sambungkan ke create order.
+                    createOrder()
                 },
+                enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -158,7 +267,7 @@ fun OrderScreen(
                 )
             ) {
                 Text(
-                    text = "Pesan ${service.nama}",
+                    text = if (isLoading) "Memproses..." else "Pesan ${service.nama}",
                     color = White,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
@@ -215,7 +324,12 @@ private fun MapPreviewCard() {
 }
 
 @Composable
-private fun LocationSummaryCard() {
+private fun LocationInputCard(
+    pickupAddress: String,
+    onPickupAddressChange: (String) -> Unit,
+    destinationAddress: String,
+    onDestinationAddressChange: (String) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -228,9 +342,11 @@ private fun LocationSummaryCard() {
             .background(White)
             .padding(18.dp)
     ) {
-        LocationRow(
+        LocationInputRow(
             title = "Lokasi Jemput",
-            value = "Pilih lokasi jemput",
+            value = pickupAddress,
+            onValueChange = onPickupAddressChange,
+            placeholder = "Masukkan lokasi jemput",
             color = SuccessGreen
         )
 
@@ -245,18 +361,22 @@ private fun LocationSummaryCard() {
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        LocationRow(
+        LocationInputRow(
             title = "Tujuan",
-            value = "Pilih lokasi tujuan",
+            value = destinationAddress,
+            onValueChange = onDestinationAddressChange,
+            placeholder = "Masukkan lokasi tujuan",
             color = ErrorRed
         )
     }
 }
 
 @Composable
-private fun LocationRow(
+private fun LocationInputRow(
     title: String,
     value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
     color: Color
 ) {
     Row(
@@ -285,26 +405,38 @@ private fun LocationRow(
         ) {
             Text(
                 text = title,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 color = TextSecondary
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = value,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                placeholder = {
+                    Text(
+                        text = placeholder,
+                        color = TextPlaceholder,
+                        fontSize = 14.sp
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    focusedBorderColor = PrimaryBlue,
+                    unfocusedBorderColor = BorderGray,
+                    focusedContainerColor = White,
+                    unfocusedContainerColor = White,
+                    cursorColor = PrimaryBlue
+                )
             )
         }
-
-        Icon(
-            imageVector = Icons.Default.KeyboardArrowRight,
-            contentDescription = "Pilih $title",
-            tint = TextPlaceholder,
-            modifier = Modifier.size(24.dp)
-        )
     }
 }
 
@@ -371,6 +503,53 @@ private fun SelectedServiceCard(
             fontWeight = FontWeight.Bold,
             color = PrimaryBlue,
             textAlign = TextAlign.End
+        )
+    }
+}
+
+@Composable
+private fun OrderInputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    title: String,
+    placeholder: String
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = title,
+            color = TextPrimary,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    color = TextPlaceholder,
+                    fontSize = 14.sp
+                )
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                focusedBorderColor = PrimaryBlue,
+                unfocusedBorderColor = BorderGray,
+                focusedContainerColor = White,
+                unfocusedContainerColor = White,
+                cursorColor = PrimaryBlue
+            )
         )
     }
 }

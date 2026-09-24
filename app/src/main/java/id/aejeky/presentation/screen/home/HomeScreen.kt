@@ -51,6 +51,8 @@ import id.aejeky.data.model.Layanan
 import id.aejeky.presentation.component.JekyBottomNavigationBar
 import id.aejeky.presentation.component.JekySearchBar
 import id.aejeky.presentation.component.JekyServiceCard
+import androidx.compose.ui.platform.LocalContext
+import id.aejeky.data.local.SessionManager
 import id.aejeky.presentation.theme.DarkBlue
 import id.aejeky.presentation.theme.ErrorRed
 import id.aejeky.presentation.theme.LightBlue
@@ -62,8 +64,20 @@ import id.aejeky.presentation.theme.White
 
 @Composable
 fun HomeScreen(
-    onServiceClick: (Layanan) -> Unit
+    onServiceClick: (Layanan) -> Unit,
+    onLogoutClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onOrderHistoryClick: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    val sessionManager = remember {
+        SessionManager(context)
+    }
+
+    val customerName = sessionManager.getName().ifBlank {
+        "User"
+    }
     var services by remember { mutableStateOf<List<Layanan>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf("") }
@@ -134,12 +148,24 @@ fun HomeScreen(
                     )
 
                     Text(
-                        text = "Nama User",
+                        text = customerName,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = White
                     )
                 }
+
+                Text(
+                    text = "Logout",
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .clickable {
+                            onLogoutClick()
+                        },
+                    color = White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
                 Box(
                     modifier = Modifier
@@ -348,7 +374,19 @@ fun HomeScreen(
         JekyBottomNavigationBar(
             selectedMenu = selectedBottomMenu,
             onMenuClick = { menu: String ->
-                selectedBottomMenu = menu
+                when (menu) {
+                    "profile" -> {
+                        onProfileClick()
+                    }
+
+                    "order" -> {
+                        onOrderHistoryClick()
+                    }
+
+                    else -> {
+                        selectedBottomMenu = menu
+                    }
+                }
             },
             modifier = Modifier
                 .align(Alignment.BottomCenter)

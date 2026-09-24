@@ -34,11 +34,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -47,6 +49,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.aejeky.R
+import id.aejeky.data.api.ApiClient
+import id.aejeky.data.local.SessionManager
+import id.aejeky.data.model.MobileLoginRequest
 import id.aejeky.presentation.theme.BorderGray
 import id.aejeky.presentation.theme.GoogleRed
 import id.aejeky.presentation.theme.PrimaryBlue
@@ -55,6 +60,7 @@ import id.aejeky.presentation.theme.TextPlaceholder
 import id.aejeky.presentation.theme.TextPrimary
 import id.aejeky.presentation.theme.TextSecondary
 import id.aejeky.presentation.theme.White
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -66,12 +72,24 @@ fun LoginScreen(
     var emailOrPhone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
+
     var emailOrPhoneError by remember { mutableStateOf("") }
     var passwordError by remember { mutableStateOf("") }
 
-    fun validateLogin() {
+    var isLoading by remember { mutableStateOf(false) }
+    var apiMessage by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val sessionManager = remember {
+        SessionManager(context)
+    }
+
+    val scope = rememberCoroutineScope()
+
+    fun validateLogin(): Boolean {
         emailOrPhoneError = ""
         passwordError = ""
+        apiMessage = ""
 
         var isValid = true
 
@@ -88,8 +106,49 @@ fun LoginScreen(
             isValid = false
         }
 
-        if (isValid) {
-            onLoginClick()
+        return isValid
+    }
+
+    fun loginCustomer() {
+        if (!validateLogin()) {
+            return
+        }
+
+        scope.launch {
+            isLoading = true
+
+            try {
+                val response = ApiClient.service.loginCustomer(
+                    MobileLoginRequest(
+                        emailOrPhone = emailOrPhone,
+                        password = password
+                    )
+                )
+
+                if (response.isSuccessful) {
+                    val body = response.body()
+
+                    if (body?.success == true) {
+                        sessionManager.saveLoginSession(
+                            token = body.token ?: "",
+                            customerId = body.customerId ?: -1L,
+                            name = body.name ?: "",
+                            email = body.email,
+                            noHp = body.noHp
+                        )
+
+                        onLoginClick()
+                    } else {
+                        apiMessage = body?.message ?: "Login gagal"
+                    }
+                } else {
+                    apiMessage = "Login gagal. Coba lagi."
+                }
+            } catch (e: Exception) {
+                apiMessage = e.message ?: "Tidak dapat terhubung ke server"
+            } finally {
+                isLoading = false
+            }
         }
     }
 
@@ -113,11 +172,13 @@ fun LoginScreen(
             onEmailOrPhoneChange = {
                 emailOrPhone = it
                 emailOrPhoneError = ""
+                apiMessage = ""
             },
             password = password,
             onPasswordChange = {
                 password = it
                 passwordError = ""
+                apiMessage = ""
             },
             isPasswordVisible = isPasswordVisible,
             onPasswordVisibilityClick = {
@@ -125,8 +186,10 @@ fun LoginScreen(
             },
             emailOrPhoneError = emailOrPhoneError,
             passwordError = passwordError,
+            apiMessage = apiMessage,
+            isLoading = isLoading,
             onLoginClick = {
-                validateLogin()
+                loginCustomer()
             },
             onRegisterClick = onRegisterClick,
             onForgotPasswordClick = onForgotPasswordClick
@@ -206,6 +269,8 @@ private fun LoginForm(
     onPasswordVisibilityClick: () -> Unit,
     emailOrPhoneError: String,
     passwordError: String,
+    apiMessage: String,
+    isLoading: Boolean,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit
@@ -278,8 +343,22 @@ private fun LoginForm(
 
         Spacer(modifier = Modifier.height(18.dp))
 
+        if (apiMessage.isNotEmpty()) {
+            Text(
+                text = apiMessage,
+                modifier = Modifier.fillMaxWidth(),
+                color = GoogleRed,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
         LoginButton(
-            onClick = onLoginClick
+            onClick = onLoginClick,
+            isLoading = isLoading
         )
 
         Spacer(modifier = Modifier.height(18.dp))
@@ -350,7 +429,7 @@ private fun LoginInputField(
                 unfocusedTextColor = TextPrimary,
                 errorTextColor = TextPrimary,
 
-                focusedPlaceholderColor =  TextPlaceholder,
+                focusedPlaceholderColor = TextPlaceholder,
                 unfocusedPlaceholderColor = TextPlaceholder,
                 errorPlaceholderColor = TextPlaceholder,
 
@@ -390,10 +469,12 @@ private fun LoginInputField(
 
 @Composable
 private fun LoginButton(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isLoading: Boolean
 ) {
     Button(
         onClick = onClick,
+        enabled = !isLoading,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
@@ -403,7 +484,7 @@ private fun LoginButton(
         )
     ) {
         Text(
-            text = "Masuk",
+            text = if (isLoading) "Memproses..." else "Masuk",
             color = White,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold
