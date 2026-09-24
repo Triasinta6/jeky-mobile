@@ -52,7 +52,8 @@ import id.aejeky.presentation.theme.White
 
 @Composable
 fun ForgotPasswordScreen(
-    onBackToLoginClick: () -> Unit
+    onBackToLoginClick: () -> Unit,
+    onOtpSent: (String) -> Unit
 ) {
     var emailOrPhone by remember { mutableStateOf("") }
     var emailOrPhoneError by remember { mutableStateOf("") }
@@ -90,7 +91,7 @@ fun ForgotPasswordScreen(
             try {
                 val response = ApiClient.service.forgotPassword(
                     ForgotPasswordRequest(
-                        emailOrPhone = emailOrPhone.trim()
+                        email = emailOrPhone.trim()
                     )
                 )
 
@@ -98,10 +99,7 @@ fun ForgotPasswordScreen(
                     val body = response.body()
 
                     if (body?.success == true) {
-                        successMessage =
-                            body.message.ifBlank {
-                                "Intruksi pemulihan kata sandi berhasil dikirim."
-                            }
+                        onOtpSent(emailOrPhone.trim())
                     } else {
                         apiMessage =
                             body?.message ?: "Gagal mingirim intruksi pemulihan."
@@ -155,6 +153,18 @@ fun ForgotPasswordScreen(
                 text = successMessage,
                 modifier = Modifier.fillMaxWidth(),
                 color = PrimaryBlue,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        if (apiMessage.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = apiMessage,
+                modifier = Modifier.fillMaxWidth(),
+                color = GoogleRed,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium
             )
