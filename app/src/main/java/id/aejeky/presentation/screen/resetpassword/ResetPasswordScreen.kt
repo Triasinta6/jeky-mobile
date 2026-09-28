@@ -136,7 +136,7 @@ fun ResetPasswordScreen(
                     ResetPasswordRequest(
                         email = email.trim(),
                         otp = otp.trim(),
-                        password = password,
+                        newPassword = password,
                         confirmPassword = confirmPassword
                     )
                 )

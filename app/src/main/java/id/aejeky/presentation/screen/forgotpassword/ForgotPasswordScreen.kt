@@ -83,7 +83,7 @@ fun ForgotPasswordScreen(
             return
         }
 
-        scope.launch {
+        scope.launch { 
             isLoading = true
             apiMessage = ""
             successMessage = ""
@@ -108,7 +108,8 @@ fun ForgotPasswordScreen(
                     apiMessage = "Gagal mengirim intruksi pemulihan."
                 }
             } catch (e: Exception) {
-                apiMessage = "Tidak dapat terhubung ke server."
+                apiMessage = "${e.javaClass.simpleName}: ${e.message}"
+                android.util.Log.e("JekyAPI", "API error", e)
             } finally {
                 isLoading = false
             }
