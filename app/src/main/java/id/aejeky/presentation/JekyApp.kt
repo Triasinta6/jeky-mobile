@@ -9,6 +9,8 @@ import androidx.compose.ui.platform.LocalContext
 import id.aejeky.data.local.SessionManager
 import id.aejeky.data.model.Layanan
 import id.aejeky.data.model.OrderHistoryResponse
+import id.aejeky.data.model.ResetPasswordRequest
+import id.aejeky.presentation.screen.resetpassword.ResetPasswordScreen
 import id.aejeky.presentation.screen.first.FirstScreen
 import id.aejeky.presentation.screen.forgotpassword.ForgotPasswordScreen
 import id.aejeky.presentation.screen.home.HomeScreen
@@ -45,6 +47,10 @@ fun JekyApp() {
         mutableStateOf<OrderHistoryResponse?>(null)
     }
 
+    var resetPasswordEmail by remember {
+        mutableStateOf("")
+    }
+
     when (currentScreen) {
         "first" -> {
             FirstScreen(
@@ -74,6 +80,23 @@ fun JekyApp() {
         "forgot_password" -> {
             ForgotPasswordScreen(
                 onBackToLoginClick = {
+                    currentScreen = "login"
+                },
+                onOtpSent = { email ->
+                    resetPasswordEmail = email
+                    currentScreen = "reset_password"
+                }
+            )
+        }
+
+        "reset_password" -> {
+            ResetPasswordScreen(
+                email = resetPasswordEmail,
+                onBackClick = {
+                    currentScreen = "forgot_password"
+                },
+                onResetSuccess = {
+                    resetPasswordEmail = ""
                     currentScreen = "login"
                 }
             )

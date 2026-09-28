@@ -1,5 +1,7 @@
 package id.aejeky.data.api
 
+import id.aejeky.data.model.ResetPasswordRequest
+import id.aejeky.data.model.ResetPasswordResponse
 import id.aejeky.data.model.ForgotPasswordRequest
 import id.aejeky.data.model.ForgotPasswordResponse
 import id.aejeky.data.model.Layanan
@@ -42,6 +44,11 @@ interface JekyApiService {
     suspend fun forgotPassword(
         @Body request: ForgotPasswordRequest
     ): Response<ForgotPasswordResponse>
+
+    @POST("mobile/auth/reset-password")
+    suspend fun resetPassword(
+        @Body request: ResetPasswordRequest
+    ): Response<ResetPasswordResponse>
 
     @GET("mobile/profile/{customerId}")
     suspend fun getCustomerProfile(
