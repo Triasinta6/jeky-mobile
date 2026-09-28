@@ -338,7 +338,7 @@ private fun SendInstructionButton(
         )
     ) {
         Text(
-            text = if (isLoading) "Mengirim..." else "Kirim Instruksi",
+            text = if (isLoading) "Mengirim..." else "Kirim",
             color = White,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold
